@@ -1,11 +1,12 @@
 const express = require("express");
+const { inputValidation } = require("@ownhealthil/middleware");
+const { InternalServerError } = require("@ownhealthil/http-errors");
 const {
   createUser,
   getAllUsers,
   getUserById,
   deleteUser,
 } = require("../handlers/user");
-const { inputValidation } = require("@ownhealthil/middleware");
 const logger = require("../logger");
 const schemas = require("../schemas");
 
@@ -17,10 +18,13 @@ router.get("/", async (req, res, next) => {
     const users = await getAllUsers();
     res.send(users);
   } catch (error) {
-    const errorMessage = `Error in getAllUsers: ${error.message | error}`;
-    logger.error(errorMessage);
-    next(errorMessage);
-    return;
+    next(
+      new InternalServerError({
+        error: error,
+        message: `Error in getAllUsers`,
+        displayMessage: error.message,
+      })
+    );
   }
 });
 
@@ -33,12 +37,14 @@ router.get(
       const user = await getUserById(userId);
       res.send(user);
     } catch (error) {
-      const errorMessage = `Error in getUserById with id = ${userId}: ${
-        error.message | error
-      }`;
-      logger.error(errorMessage);
-      next(errorMessage);
-      return;
+      next(
+        InternalServerError({
+          error: error,
+          message: "Error in getUserById",
+          displayMessage: error.message,
+          details: { userId },
+        })
+      );
     }
   }
 );
@@ -52,12 +58,13 @@ router.post(
       const userCreated = await createUser(name, phoneNumber, email);
       res.send(userCreated);
     } catch (error) {
-      const errorMessage = `Error in createUser with values ${name}, ${phoneNumber}, ${email}: ${
-        error.message | error
-      }`;
-      logger.error(errorMessage);
-      next(errorMessage);
-      return;
+      next(
+        new InternalServerError({
+          error: error,
+          details: { name, phoneNumber, email },
+          displayMessage: error.message || "Error when creating user",
+        })
+      );
     }
   }
 );
@@ -71,12 +78,14 @@ router.delete(
       await deleteUser(userId);
       res.send(`User with id ${userId} was deleted`);
     } catch (error) {
-      const errorMessage = `Error in deleteUser with id ${userId}: ${
-        error.message | error
-      }`;
-      logger.error(errorMessage);
-      next(errorMessage);
-      return;
+      next(
+        InternalServerError({
+          error,
+          message: "Error in deleteUser",
+          details: { userId },
+          displayMessage: error.message,
+        })
+      );
     }
   }
 );

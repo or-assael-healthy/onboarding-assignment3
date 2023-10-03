@@ -1,6 +1,14 @@
 const User = require("../db").models.User;
-
+const { Op } = require("sequelize");
 const createUser = async (name, phoneNumber, email) => {
+  const isUserExists = await User.findOne({
+    where: {
+      [Op.or]: [{ email: email }, { phoneNumber: phoneNumber }],
+    },
+  });
+  if (isUserExists) {
+    throw new Error("User already exists");
+  }
   const userCreated = await User.create({
     fullName: name,
     email: email,

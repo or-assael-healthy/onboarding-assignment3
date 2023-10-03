@@ -1,5 +1,8 @@
 const logger = require("./logger");
-const { auditLogMiddleware } = require("@ownhealthil/middleware");
+const {
+  auditLogMiddleware,
+  genericErrorHandler,
+} = require("@ownhealthil/middleware");
 const routes = require("./routes");
 
 const auditLog = auditLogMiddleware({
@@ -10,4 +13,5 @@ const auditLog = auditLogMiddleware({
 module.exports = (app) => {
   app.use(auditLog);
   app.use("/users", routes.userRoutes);
+  app.use(genericErrorHandler({ logger }));
 };
