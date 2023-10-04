@@ -53,19 +53,36 @@ router.post(
   "/",
   inputValidator(schemas.createUser, "query"),
   async (req, res, next) => {
-    const { name, phoneNumber, email } = req.query;
-    try {
-      const userCreated = await createUser(name, phoneNumber, email);
-      res.send(userCreated);
-    } catch (error) {
-      next(
-        new InternalServerError({
-          error: error,
-          details: { name, phoneNumber, email },
-          displayMessage: error.message || "Error when creating user",
-        })
-      );
-    }
+    const sgMail = require("@sendgrid/mail");
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
+      to: "or.assael+test@healthy.io", // Change to your recipient
+      from: "or.assael+sendgrid@healthy.io", // Change to your verified sender
+      subject: "Sending with SendGrid is Fun",
+      text: "and easy to do anywhere, even with Node.js",
+      html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    //   const { name, phoneNumber, email } = req.query;
+    //   try {
+    //     const userCreated = await createUser(name, phoneNumber, email);
+    //     res.send(userCreated);
+    //   } catch (error) {
+    //     next(
+    //       new InternalServerError({
+    //         error: error,
+    //         details: { name, phoneNumber, email },
+    //         displayMessage: error.message || "Error when creating user",
+    //       })
+    //     );
+    //   }
   }
 );
 
