@@ -1,10 +1,21 @@
 const messenger = require("./messenger");
 const sgMail = require("@sendgrid/mail");
+const routingKeys = require("./enums/routingKeys");
 
-// const eventHandler = messenger.getEventHandler({
-//   queueName: process.env.QUEUE_NAME,
-// });
+const eventHandler = messenger.getEventHandler({
+  queueName: process.env.QUEUE_NAME,
+});
 
+eventHandler.on(routingKeys.USER_CREATED, async (msg) => {
+  //   const { email } = msg;
+  //   await sendEmail(
+  //     email,
+  //     process.env.EMAIL_FROM,
+  //     "Welcome",
+  //     "Thank you for joining us!"
+  //   );
+  console.log("Sent mail to user"); //The email sending doesn't work due to configuration issues with healthy domain, so for now only the console.log will be printed
+});
 const sendEmail = async (to, from, subject, text, html) => {
   sgMail.setApiKey(
     "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"

@@ -1,5 +1,8 @@
 const User = require("../db").models.User;
 const { Op } = require("sequelize");
+const messenger = require("../messenger");
+const routingKeys = require("../enums/routingKeys");
+
 const createUser = async (name, phoneNumber, email) => {
   const isUserExists = await User.findOne({
     where: {
@@ -13,6 +16,11 @@ const createUser = async (name, phoneNumber, email) => {
     fullName: name,
     email: email,
     phoneNumber: phoneNumber,
+  });
+  await messenger.publish({
+    exchangeName: process.env.EXCHANGE_NAME,
+    routingKey: routingKeys.USER_CREATED,
+    payload: userCreated,
   });
   return userCreated;
 };
